@@ -32,7 +32,13 @@ func CheckPasswordHash(password, hash string) bool {
 
 func GenerateTokens(user *models.User) (string, string, error) {
 	// access token
-	expirationTime := time.Now().Add(time.Duration(os.Getenv("JWT_EXPIRATION")) * time.Hour)
+	jwtExpiration := 24 // Default to 24 hours if not set
+	if os.Getenv("JWT_EXPIRATION") != "" {
+		if exp, err := time.ParseDuration(os.Getenv("JWT_EXPIRATION") + "h"); err == nil {
+			jwtExpiration = int(exp.Hours())
+		}
+	}
+	expirationTime := time.Now().Add(time.Duration(jwtExpiration) * time.Hour)
 	claims := &AuthClaims{
 		UserID: user.ID,
 		Role:   user.Role,
@@ -48,7 +54,13 @@ func GenerateTokens(user *models.User) (string, string, error) {
 	}
 
 	// refresh token
-	refreshExpirationTime := time.Now().Add(time.Duration(os.Getenv("REFRESH_EXPIRATION")) * time.Hour)
+	refreshExpiration := 168 // Default to 168 hours (7 days) if not set
+	if os.Getenv("REFRESH_EXPIRATION") != "" {
+		if exp, err := time.ParseDuration(os.Getenv("REFRESH_EXPIRATION") + "h"); err == nil {
+			refreshExpiration = int(exp.Hours())
+		}
+	}
+	refreshExpirationTime := time.Now().Add(time.Duration(refreshExpiration) * time.Hour)
 	refreshClaims := &AuthClaims{
 		UserID: user.ID,
 		Role:   user.Role,
