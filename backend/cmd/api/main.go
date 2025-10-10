@@ -47,9 +47,10 @@ func main() {
 		admin := api.Group("/")
 		admin.Use(handlers.RoleMiddleware("admin"))
 		{
-			// Example: CRUD Packages
-			// admin.POST("/packages", handlers.CreatePackageHandler)
-			// admin.DELETE("/staff/:id", handlers.DeleteStaffHandler)
+			// member delete (hanya admin)
+			admin.DELETE("/members/:id", handlers.DeleteMemberHandler)
+
+			// package CRUD
 		}
 
 		// === ADMIN & STAFF Routes ===
