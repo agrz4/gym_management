@@ -51,6 +51,16 @@ func main() {
 			admin.DELETE("/members/:id", handlers.DeleteMemberHandler)
 
 			// package CRUD
+			admin.POST("/packages", handlers.CreatePackageHandler)
+			// admin.PUT("/packages/:id", handlers.UpdatePackageHandler)
+			// admin.DELETE("/packages/:id", handlers.DeletePackageHandler)
+
+			// Staff CRUD (Full)
+			// admin.POST("/staff", handlers.CreateStaffHandler)
+			// admin.PUT("/staff/:id", handlers.UpdateStaffHandler)
+			// admin.DELETE("/staff/:id", handlers.DeleteStaffHandler)
+
+			// admin.GET("/dashboard/stats", handlers.GetStatsHandler)
 		}
 
 		// === ADMIN & STAFF Routes ===
