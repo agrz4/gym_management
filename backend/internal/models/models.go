@@ -75,3 +75,10 @@ type CreatePackageInput struct {
 	DurationDays int     `json:"durationDays" binding:"required,gt=0"`
 	Benefits     string  `json:"benefits"`
 }
+
+type UpdatePackageInput struct {
+	Name         string  `json:"name"`
+	Price        float64 `json:"price,omitempty"`
+	DurationDays int     `json:"durationDays,omitempty"`
+	Benefits     string  `json:"benefits"`
+}

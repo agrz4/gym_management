@@ -44,3 +44,8 @@ func (r *attendanceRepository) FindUncheckedOutByUserID(userID uuid.UUID) (*mode
 	}
 	return &attendance, nil
 }
+
+// Create: Membuat record absensi baru
+// func (r *attendanceRepository) Create(attendance *models.Attendance) error {
+// 	return r.db.Create(attendance).Error
+// }
