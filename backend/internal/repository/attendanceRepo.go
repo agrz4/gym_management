@@ -45,7 +45,56 @@ func (r *attendanceRepository) FindUncheckedOutByUserID(userID uuid.UUID) (*mode
 	return &attendance, nil
 }
 
-// Create: Membuat record absensi baru
-// func (r *attendanceRepository) Create(attendance *models.Attendance) error {
-// 	return r.db.Create(attendance).Error
-// }
+// Create implements AttendanceRepository.
+func (r *attendanceRepository) Create(attendance *models.Attendance) error {
+	return r.db.Create(attendance).Error
+}
+
+// Update implements AttendanceRepository.
+func (r *attendanceRepository) Update(attendance *models.Attendance) error {
+	// Menggunakan Save() untuk Update berdasarkan Primary Key (ID)
+	return r.db.Save(attendance).Error
+}
+
+// FindHistoryByUserID implements AttendanceRepository. (Untuk Member History)
+func (r *attendanceRepository) FindHistoryByUserID(userID uuid.UUID, limit int) ([]models.Attendance, error) {
+	var history []models.Attendance
+
+	query := r.db.Where("user_id = ?", userID).
+		Order("check_in_time DESC")
+
+	if limit > 0 {
+		query = query.Limit(limit)
+	}
+
+	if err := query.Find(&history).Error; err != nil {
+		return nil, err
+	}
+	return history, nil
+}
+
+// FindAllHistory: Mengambil semua histori presensi dengan opsi filter.
+func (r *attendanceRepository) FindAllHistory(filterUserID *uuid.UUID, dateFrom, dateTo *time.Time) ([]models.Attendance, error) {
+	var history []models.Attendance
+
+	// Preload User (Member) untuk mendapatkan nama/email
+	query := r.db.Preload("User").Order("check_in_time DESC")
+
+	// Filter berdasarkan User ID
+	if filterUserID != nil && *filterUserID != uuid.Nil {
+		query = query.Where("user_id = ?", *filterUserID)
+	}
+
+	// Filter berdasarkan Rentang Tanggal (CheckInTime)
+	if dateFrom != nil {
+		query = query.Where("check_in_time >= ?", *dateFrom)
+	}
+	if dateTo != nil {
+		query = query.Where("check_in_time <= ?", *dateTo)
+	}
+
+	if err := query.Find(&history).Error; err != nil {
+		return nil, err
+	}
+	return history, nil
+}

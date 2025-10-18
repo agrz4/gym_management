@@ -92,13 +92,13 @@ func main() {
 		auth.POST("/register", handlers.RegisterMemberHandler)
 		// Tambahkan Refresh Token dan Logout
 		auth.POST("/refresh-token", handlers.RefreshTokenHandler)
-		auth.POST("/logout", handlers.LogoutHandler)
 	}
 
 	// Protected Routes Group
 	api := router.Group("/api")
 	api.Use(handlers.AuthMiddleware())
 	{
+		auth.POST("/logout", handlers.LogoutHandler)
 		// === ADMIN ONLY Routes ===
 		admin := api.Group("/")
 		admin.Use(handlers.RoleMiddleware("admin"))

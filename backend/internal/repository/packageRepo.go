@@ -12,6 +12,7 @@ type PackageRepository interface {
 	FindAll() ([]models.GymPackage, error)
 	FindByID(id uint) (*models.GymPackage, error)
 	Create(pkg *models.GymPackage) error
+	Update(pkg *models.GymPackage) error
 	Delete(id uint) error
 }
 

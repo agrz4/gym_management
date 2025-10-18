@@ -64,3 +64,20 @@ func GetMyHistoryHandler(c *gin.Context) {
 	}
 	c.JSON(http.StatusOK, history)
 }
+
+// GetAllHistoryHandler @route GET /api/attendance/history (Admin/Staff Only)
+func GetAllHistoryHandler(c *gin.Context) {
+	// Mengambil query parameters untuk filter
+	memberID := c.Query("member_id")
+	dateFrom := c.Query("date_from")
+	dateTo := c.Query("date_to")
+
+	// Panggil service untuk mendapatkan histori dengan filter
+	history, err := service.GetAllHistory(memberID, dateFrom, dateTo)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Gagal mengambil semua histori presensi."})
+		return
+	}
+
+	c.JSON(http.StatusOK, history)
+}

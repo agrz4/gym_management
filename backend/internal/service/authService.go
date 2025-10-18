@@ -149,3 +149,69 @@ func LoginService(email, password string) (*models.User, string, string, error) 
 
 	return user, accessToken, refreshToken, nil
 }
+
+// ValidateRefreshToken parses and validates the refresh token.
+func ValidateRefreshToken(tokenString string) (*AuthClaims, error) {
+	claims := &AuthClaims{}
+	token, err := jwt.ParseWithClaims(tokenString, claims, func(token *jwt.Token) (interface{}, error) {
+		if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
+			return nil, errors.New("unexpected signing method")
+		}
+		return []byte(os.Getenv("REFRESH_SECRET")), nil
+	})
+
+	if err != nil {
+		return nil, err
+	}
+
+	if !token.Valid {
+		return nil, errors.New("token is invalid")
+	}
+
+	return claims, nil
+}
+
+// RefreshTokenService handles the logic for exchanging a refresh token for a new access token.
+func RefreshTokenService(refreshTokenString string) (string, string, error) {
+	claims, err := ValidateRefreshToken(refreshTokenString)
+	if err != nil {
+		return "", "", errors.New("refresh token tidak valid atau kadaluarsa")
+	}
+
+	// 1. Cari User di DB
+	user, err := authRepo.FindByID(claims.UserID)
+	if err != nil {
+		return "", "", errors.New("user tidak ditemukan")
+	}
+
+	// 2. Verifikasi apakah refresh token di DB cocok dengan yang dikirim
+	if user.RefreshToken != refreshTokenString {
+		// Ini mungkin tanda adanya serangan, sebaiknya semua token di-revoke
+		user.RefreshToken = ""
+		authRepo.Update(user)
+		return "", "", errors.New("refresh token dicabut")
+	}
+
+	// 3. Generate token baru
+	newAccessToken, newRefreshToken, err := GenerateTokens(user)
+	if err != nil {
+		return "", "", errors.New("gagal membuat token baru")
+	}
+
+	// 4. Update refresh token di DB
+	user.RefreshToken = newRefreshToken
+	authRepo.Update(user)
+
+	return newAccessToken, newRefreshToken, nil
+}
+
+// LogoutService clears the refresh token in the database.
+func LogoutService(userID uuid.UUID) error {
+	user, err := authRepo.FindByID(userID)
+	if err != nil {
+		return nil // Jika user tidak ditemukan, anggap saja sudah logout
+	}
+
+	user.RefreshToken = ""
+	return authRepo.Update(user)
+}

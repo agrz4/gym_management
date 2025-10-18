@@ -5,3 +5,5 @@ go get github.com/golang-jwt/jwt/v5
 go get golang.org/x/crypto/bcrypt
 go get github.com/joho/godotenv
 go get github.com/google/uuid
+
+feat(auth): move logout route to protected group and update handlers
