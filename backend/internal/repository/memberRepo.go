@@ -28,6 +28,9 @@ func NewMemberRepository() MemberRepository {
 
 // FindAll implements MemberRepository.
 func (r *memberRepository) FindAll(search string, isActive *bool) ([]models.User, error) {
+	if r.db == nil {
+		return nil, errors.New("database connection not established")
+	}
 	var members []models.User
 	query := r.db.Where("role = ?", "member").Preload("Package")
 
@@ -48,6 +51,9 @@ func (r *memberRepository) FindAll(search string, isActive *bool) ([]models.User
 
 // FindByID implements MemberRepository.
 func (r *memberRepository) FindByID(id uuid.UUID) (*models.User, error) {
+	if r.db == nil {
+		return nil, errors.New("database connection not established")
+	}
 	var user models.User
 	if err := r.db.Preload("Package").First(&user, "id = ? AND role = ?", id, "member").Error; err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
@@ -60,21 +66,33 @@ func (r *memberRepository) FindByID(id uuid.UUID) (*models.User, error) {
 
 // Update implements MemberRepository.
 func (r *memberRepository) Update(member *models.User) error {
+	if r.db == nil {
+		return errors.New("database connection not established")
+	}
 	return r.db.Save(member).Error
 }
 
 // Delete implements MemberRepository.
 func (r *memberRepository) Delete(id uuid.UUID) error {
+	if r.db == nil {
+		return errors.New("database connection not established")
+	}
 	return r.db.Delete(&models.User{}, "id = ? AND role = ?", id, "member").Error
 }
 
 // Create dan FindByEmail sudah ada di auth_repo.go, tapi kita tetap perlu
 // memastikan Create di sini untuk konsistensi, atau menggunakan AuthRepo untuk Create.
 func (r *memberRepository) Create(member *models.User) error {
+	if r.db == nil {
+		return errors.New("database connection not established")
+	}
 	return r.db.Create(member).Error
 }
 
 func (r *memberRepository) FindByEmail(email string) (*models.User, error) {
+	if r.db == nil {
+		return nil, errors.New("database connection not established")
+	}
 	var user models.User
 	if err := r.db.Where("email = ? AND role = ?", email, "member").First(&user).Error; err != nil {
 		return nil, err

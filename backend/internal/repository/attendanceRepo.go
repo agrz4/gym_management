@@ -28,6 +28,9 @@ func NewAttendanceRepository() AttendanceRepository {
 
 // FindUncheckedOutByUserID: Mencari absensi hari ini yang belum CheckOut
 func (r *attendanceRepository) FindUncheckedOutByUserID(userID uuid.UUID) (*models.Attendance, error) {
+	if r.db == nil {
+		return nil, errors.New("database connection not established")
+	}
 	var attendance models.Attendance
 
 	todayStart := time.Now().Truncate(24 * time.Hour) // Awal hari ini
@@ -47,17 +50,26 @@ func (r *attendanceRepository) FindUncheckedOutByUserID(userID uuid.UUID) (*mode
 
 // Create implements AttendanceRepository.
 func (r *attendanceRepository) Create(attendance *models.Attendance) error {
+	if r.db == nil {
+		return errors.New("database connection not established")
+	}
 	return r.db.Create(attendance).Error
 }
 
 // Update implements AttendanceRepository.
 func (r *attendanceRepository) Update(attendance *models.Attendance) error {
+	if r.db == nil {
+		return errors.New("database connection not established")
+	}
 	// Menggunakan Save() untuk Update berdasarkan Primary Key (ID)
 	return r.db.Save(attendance).Error
 }
 
 // FindHistoryByUserID implements AttendanceRepository. (Untuk Member History)
 func (r *attendanceRepository) FindHistoryByUserID(userID uuid.UUID, limit int) ([]models.Attendance, error) {
+	if r.db == nil {
+		return nil, errors.New("database connection not established")
+	}
 	var history []models.Attendance
 
 	query := r.db.Where("user_id = ?", userID).
@@ -75,6 +87,9 @@ func (r *attendanceRepository) FindHistoryByUserID(userID uuid.UUID, limit int) 
 
 // FindAllHistory: Mengambil semua histori presensi dengan opsi filter.
 func (r *attendanceRepository) FindAllHistory(filterUserID *uuid.UUID, dateFrom, dateTo *time.Time) ([]models.Attendance, error) {
+	if r.db == nil {
+		return nil, errors.New("database connection not established")
+	}
 	var history []models.Attendance
 
 	// Preload User (Member) untuk mendapatkan nama/email

@@ -83,14 +83,6 @@ func RefreshTokenHandler(c *gin.Context) {
 // @route POST /api/auth/logout
 // @access Protected (any role)
 func LogoutHandler(c *gin.Context) {
-	// PENTING: Untuk logout, kita menggunakan AuthMiddleware untuk mendapatkan UserID
-	// Namun, LogoutHandler berada di Public Routes Group, sehingga AuthMiddleware belum berjalan.
-	// Kita harus memindahkan rute Logout ke Protected Group, atau menerima token dari body/header.
-	// Pilihan yang lebih baik: Pindahkan ke Protected Group API.
-
-	// Pindahkan rute '/logout' ke api.Group() di main.go
-
-	// Asumsi rute ini berada di Protected Group (setelah AuthMiddleware):
 	userID := c.MustGet("userID").(uuid.UUID)
 
 	if err := service.LogoutService(userID); err != nil {

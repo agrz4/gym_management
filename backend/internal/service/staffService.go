@@ -19,6 +19,9 @@ func NewStaffService() *StaffService {
 
 // GetStaffs mengambil semua user dengan role 'staff'
 func (s *StaffService) GetStaffs() ([]models.User, error) {
+	if config.DB == nil {
+		return nil, errors.New("database connection not established")
+	}
 	var staffs []models.User
 	// Gorm Find with Where clause for role
 	if err := config.DB.Where("role IN (?)", []string{"staff", "admin"}).Find(&staffs).Error; err != nil {
@@ -56,6 +59,9 @@ func (s *StaffService) CreateStaff(input models.RegisterInput, role string) (*mo
 
 // UpdateStaff
 func (s *StaffService) UpdateStaff(id uuid.UUID, input models.RegisterInput) (*models.User, error) {
+	if s.repo == nil {
+		return nil, errors.New("repository not initialized")
+	}
 	staff, err := s.repo.FindByID(id)
 	if err != nil || staff == nil || (staff.Role != "staff" && staff.Role != "admin") {
 		return nil, errors.New("staff/admin tidak ditemukan")
@@ -72,6 +78,9 @@ func (s *StaffService) UpdateStaff(id uuid.UUID, input models.RegisterInput) (*m
 
 // DeleteStaff
 func (s *StaffService) DeleteStaff(id uuid.UUID) error {
+	if config.DB == nil {
+		return errors.New("database connection not established")
+	}
 	// Pastikan tidak menghapus diri sendiri atau admin utama (opsional)
 	return config.DB.Where("id = ? AND role IN (?)", id, []string{"staff", "admin"}).Delete(&models.User{}).Error
 }

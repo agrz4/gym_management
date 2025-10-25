@@ -26,6 +26,9 @@ func NewPackageRepository() PackageRepository {
 }
 
 func (r *packageRepository) FindAll() ([]models.GymPackage, error) {
+	if r.db == nil {
+		return nil, errors.New("database connection not established")
+	}
 	var pkgs []models.GymPackage
 	if err := r.db.Order("price ASC").Find(&pkgs).Error; err != nil {
 		return nil, err
@@ -34,6 +37,9 @@ func (r *packageRepository) FindAll() ([]models.GymPackage, error) {
 }
 
 func (r *packageRepository) FindByID(id uint) (*models.GymPackage, error) {
+	if r.db == nil {
+		return nil, errors.New("database connection not established")
+	}
 	var pkg models.GymPackage
 	if err := r.db.First(&pkg, id).Error; err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
@@ -45,14 +51,23 @@ func (r *packageRepository) FindByID(id uint) (*models.GymPackage, error) {
 }
 
 func (r *packageRepository) Create(pkg *models.GymPackage) error {
+	if r.db == nil {
+		return errors.New("database connection not established")
+	}
 	return r.db.Create(pkg).Error
 }
 
 func (r *packageRepository) Update(pkg *models.GymPackage) error {
+	if r.db == nil {
+		return errors.New("database connection not established")
+	}
 	return r.db.Save(pkg).Error
 }
 
 func (r *packageRepository) Delete(id uint) error {
+	if r.db == nil {
+		return errors.New("database connection not established")
+	}
 	// Gorm akan gagal jika ada foreign key constraint (member terkait), ini perilaku yang diinginkan
 	return r.db.Delete(&models.GymPackage{}, id).Error
 }

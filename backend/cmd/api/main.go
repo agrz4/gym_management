@@ -16,6 +16,9 @@ import (
 
 // InitialSetup runs database migrations/setup
 func InitialSetup() {
+	if config.DB == nil {
+		log.Fatal("Database connection not established")
+	}
 	// Create PostgreSQL ENUM Type
 	if err := config.DB.Exec("CREATE TYPE IF NOT EXISTS role_enum AS ENUM ('admin', 'staff', 'member')").Error; err != nil {
 		// Log error jika ENUM tidak dapat dibuat (terutama jika sudah ada)
@@ -31,6 +34,9 @@ func InitialSetup() {
 
 // SeedData inserts initial users and packages if they don't exist.
 func SeedData() {
+	if config.DB == nil {
+		log.Fatal("Database connection not established")
+	}
 	// PENTING: Pastikan semua service yang dibutuhkan (NewStaffService, RegisterMemberService) tersedia.
 	staffService := service.NewStaffService()
 
@@ -90,7 +96,7 @@ func main() {
 	{
 		auth.POST("/login", handlers.LoginHandler)
 		auth.POST("/register", handlers.RegisterMemberHandler)
-		// Tambahkan Refresh Token dan Logout
+		// Tambahkan Refresh Token
 		auth.POST("/refresh-token", handlers.RefreshTokenHandler)
 	}
 
@@ -98,7 +104,8 @@ func main() {
 	api := router.Group("/api")
 	api.Use(handlers.AuthMiddleware())
 	{
-		auth.POST("/logout", handlers.LogoutHandler)
+		// Logout route moved to protected group
+		api.POST("/auth/logout", handlers.LogoutHandler)
 		// === ADMIN ONLY Routes ===
 		admin := api.Group("/")
 		admin.Use(handlers.RoleMiddleware("admin"))

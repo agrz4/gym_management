@@ -7,3 +7,6 @@ go get github.com/joho/godotenv
 go get github.com/google/uuid
 
 feat(auth): move logout route to protected group and update handlers
+
+run:
+go run cmd/api/main.go

@@ -25,6 +25,9 @@ func NewAuthRepository() AuthRepository {
 }
 
 func (r *authRepository) FindByEmail(email string) (*models.User, error) {
+	if r.db == nil {
+		return nil, errors.New("database connection not established")
+	}
 	var user models.User
 	if err := r.db.Where("email = ?", email).First(&user).Error; err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
@@ -36,14 +39,23 @@ func (r *authRepository) FindByEmail(email string) (*models.User, error) {
 }
 
 func (r *authRepository) Create(user *models.User) error {
+	if r.db == nil {
+		return errors.New("database connection not established")
+	}
 	return r.db.Create(user).Error
 }
 
 func (r *authRepository) Update(user *models.User) error {
+	if r.db == nil {
+		return errors.New("database connection not established")
+	}
 	return r.db.Save(user).Error
 }
 
 func (r *authRepository) FindByID(id uuid.UUID) (*models.User, error) {
+	if r.db == nil {
+		return nil, errors.New("database connection not established")
+	}
 	var user models.User
 	if err := r.db.Where("id = ?", id).First(&user).Error; err != nil {
 		return nil, err
